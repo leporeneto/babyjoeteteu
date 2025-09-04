@@ -41,11 +41,11 @@ async function handleSubmit(e) {
     id: "id-" + Date.now(),
     nome: document.getElementById("nome").value,
     tipo: document.getElementById("tipo").value,
-    pas: document.getElementById("pas")?.value || "",
-    pad: document.getElementById("pad")?.value || "",
-    fc: document.getElementById("fc")?.value || "",
-    mgdl: document.getElementById("mgdl")?.value || "",
-    contexto: document.getElementById("ctx")?.value || "",
+    pas: document.getElementById("pas") ? document.getElementById("pas").value : "",
+    pad: document.getElementById("pad") ? document.getElementById("pad").value : "",
+    fc: document.getElementById("fc") ? document.getElementById("fc").value : "",
+    mgdl: document.getElementById("mgdl") ? document.getElementById("mgdl").value : "",
+    contexto: document.getElementById("ctx") ? document.getElementById("ctx").value : "",
     obs: document.getElementById("obs").value,
     datetime: document.getElementById("usarAgora").checked
       ? new Date().toISOString()
@@ -59,13 +59,15 @@ async function handleSubmit(e) {
   });
 
   const result = await res.json();
-  if (result.status === "ok") {{
+  console.log("Resposta do servidor:", result);
+
+  if (result.status === "ok") {
     alert("Registro salvo!");
     e.target.reset();
     document.getElementById("usarAgora").checked = true;
-  }} else {{
+  } else {
     alert("Erro ao salvar: " + result.message);
-  }}
+  }
 }
 
 async function loadResults() {
@@ -73,10 +75,15 @@ async function loadResults() {
   if (!table) return;
   const tbody = table.querySelector("tbody");
 
-  const fNome = (document.getElementById("fNome")?.value || "").toLowerCase().trim();
-  const fTipo = (document.getElementById("fTipo")?.value || "").trim();
-  const fIni = document.getElementById("fIni")?.value;
-  const fFim = document.getElementById("fFim")?.value;
+  const fNomeEl = document.getElementById("fNome");
+  const fTipoEl = document.getElementById("fTipo");
+  const fIniEl = document.getElementById("fIni");
+  const fFimEl = document.getElementById("fFim");
+
+  const fNome = fNomeEl ? fNomeEl.value.toLowerCase().trim() : "";
+  const fTipo = fTipoEl ? fTipoEl.value.trim() : "";
+  const fIni = fIniEl ? fIniEl.value : "";
+  const fFim = fFimEl ? fFimEl.value : "";
 
   const url = new URL(WEBAPP_URL);
   url.searchParams.set("action", "list");
@@ -87,30 +94,24 @@ async function loadResults() {
 
   const res = await fetch(url);
   const data = await res.json();
+  console.log("Dados carregados:", data);
 
-  const rows = data.map(r => {{
+  const rows = data.map(r => {
     const valor = r.tipo === "pressao"
-      ? `${{r.pas}}/${{r.pad}} (FC: ${{r.fc}})`
-      : `${{r.mgdl}} mg/dL (${{r.contexto}})`;
+      ? `${r.pas}/${r.pad} (FC: ${r.fc})`
+      : `${r.mgdl} mg/dL (${r.contexto})`;
     return `<tr>
-      <td>{{r.datetime}}</td>
-      <td>{{r.nome}}</td>
-      <td>{{r.tipo}}</td>
-      <td>{{valor}}</td>
-      <td>{{r.obs || ""}}</td>
+      <td>${r.datetime}</td>
+      <td>${r.nome}</td>
+      <td>${r.tipo}</td>
+      <td>${valor}</td>
+      <td>${r.obs || ""}</td>
     </tr>`;
-  }}).join("");
+  }).join("");
 
   tbody.innerHTML = rows || `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
 
-  // Desenhar gráficos
   drawCharts(data);
-}
-
-function toggleFields() {
-  const tipo = document.getElementById("tipo").value;
-  document.getElementById("pressaoFields").hidden = (tipo !== "pressao");
-  document.getElementById("glicemiaFields").hidden = (tipo !== "glicemia");
 }
 
 function fmtDate(dstr) {
@@ -124,46 +125,42 @@ function drawCharts(data) {
   const ctxGlic = document.getElementById("chartGlic");
   if (!ctxPA || !ctxGlic) return;
 
-  const dPA = data.filter(r=>r.tipo==="pressao");
-  const dG = data.filter(r=>r.tipo==="glicemia");
+  const dPA = data.filter(r => r.tipo === "pressao");
+  const dG = data.filter(r => r.tipo === "glicemia");
 
-  if (dPA.length) {{
-    new Chart(ctxPA, {{
+  if (dPA.length) {
+    new Chart(ctxPA, {
       type: 'line',
-      data: {{
-        labels: dPA.map(r=>fmtDate(r.datetime)),
+      data: {
+        labels: dPA.map(r => fmtDate(r.datetime)),
         datasets: [
-          {{ label:'PAS', data: dPA.map(r=>Number(r.pas)), borderColor:"#f87171", fill:false }},
-          {{ label:'PAD', data: dPA.map(r=>Number(r.pad)), borderColor:"#60a5fa", fill:false }},
-          {{ label:'FC',  data: dPA.map(r=>Number(r.fc)), borderColor:"#10b981", fill:false }}
+          { label: 'PAS', data: dPA.map(r => Number(r.pas)), borderColor: "#f87171", fill: false },
+          { label: 'PAD', data: dPA.map(r => Number(r.pad)), borderColor: "#60a5fa", fill: false },
+          { label: 'FC', data: dPA.map(r => Number(r.fc)), borderColor: "#10b981", fill: false }
         ]
-      }},
-      options: {{
-        responsive:true,
-        plugins: {{ legend: {{ position:"bottom" }} }},
-        scales: {{
-          y: {{ beginAtZero:false }}
-        }}
-      }}
-    }});
-  }}
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "bottom" } },
+        scales: { y: { beginAtZero: false } }
+      }
+    });
+  }
 
-  if (dG.length) {{
-    new Chart(ctxGlic, {{
+  if (dG.length) {
+    new Chart(ctxGlic, {
       type: 'line',
-      data: {{
-        labels: dG.map(r=>fmtDate(r.datetime)),
+      data: {
+        labels: dG.map(r => fmtDate(r.datetime)),
         datasets: [
-          {{ label:'Glicemia (mg/dL)', data: dG.map(r=>Number(r.mgdl)), borderColor:"#f59e0b", fill:false }}
+          { label: 'Glicemia (mg/dL)', data: dG.map(r => Number(r.mgdl)), borderColor: "#f59e0b", fill: false }
         ]
-      }},
-      options: {{
-        responsive:true,
-        plugins: {{ legend: {{ position:"bottom" }} }},
-        scales: {{
-          y: {{ beginAtZero:false }}
-        }}
-      }}
-    }});
-  }}
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "bottom" } },
+        scales: { y: { beginAtZero: false } }
+      }
+    });
+  }
 }
