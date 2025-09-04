@@ -74,7 +74,7 @@ async function loadResults() {
   const tbody = table.querySelector("tbody");
 
   const fNome = (document.getElementById("fNome")?.value || "").toLowerCase().trim();
-    const fTipo = (document.getElementById("fTipo")?.value || "";
+  const fTipo = (document.getElementById("fTipo")?.value || "").trim();
   const fIni = document.getElementById("fIni")?.value;
   const fFim = document.getElementById("fFim")?.value;
 
