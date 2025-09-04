@@ -4,35 +4,75 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gestante Health Tracker V3 — Resultados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header class="site-header">
-    <h1>Resultados <span class="badge">V3</span></h1>
-    <nav class="topnav">
+    <div class="container header-content">
+      <div>
+        <h1>Resultados <span class="badge">V3</span></h1>
+        <p>Veja seus registros da planilha do Google Sheets 📊</p>
+      </div>
+      <img src="assets/couple.jpg" alt="Casal gestante" class="hero-img" onerror="this.style.display='none'"/>
+    </div>
+    <nav class="topnav container">
       <a href="index.html">Registrar</a>
       <a href="results.html" aria-current="page">Resultados</a>
     </nav>
   </header>
-  <main class="container">
+
+  <main class="container grid">
     <section class="card">
-      <h2>Registros</h2>
-      <table id="resultsTable">
-        <thead>
-          <tr>
-            <th>Data</th><th>Nome</th><th>Tipo</th><th>Valor</th><th>Obs.</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <h2>Filtros</h2>
+      <form id="filterForm" class="filters">
+        <input id="fNome" type="text" placeholder="Nome" />
+        <select id="fTipo">
+          <option value="">Todos</option>
+          <option value="pressao">Pressão</option>
+          <option value="glicemia">Glicemia</option>
+        </select>
+        <input id="fIni" type="date" />
+        <input id="fFim" type="date" />
+        <button class="btn" type="submit">Aplicar</button>
+        <button class="btn ghost" id="resetFiltros" type="button">Limpar</button>
+      </form>
     </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Registros</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="table" id="resultsTable">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Obs.</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
     <section class="card">
       <h2>Gráficos</h2>
       <canvas id="chartPA" height="120"></canvas>
       <canvas id="chartGlic" height="120"></canvas>
     </section>
   </main>
+
+  <footer class="site-footer container">
+    <small><a href="index.html">Voltar ao registro</a></small>
+  </footer>
+
   <script src="js/app.js"></script>
 </body>
 </html>
