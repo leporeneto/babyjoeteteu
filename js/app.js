@@ -1,73 +1,87 @@
-(function(){
-<td>${escapeHtml(r.nome)}</td>
-<td>${r.tipo === 'pressao' ? 'Pressão' : 'Glicemia'}</td>
-<td>${escapeHtml(r.valor)}</td>
-<td>${escapeHtml(r.obs||'')}</td>
-</tr>`).join('');
-tbody.innerHTML = rows || `<tr><td colspan="5">Sem registros ainda.</td></tr>`;
-}
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxoxx6tLGa5OEEi_WYUQx0Z6fuVV6z01QmCow3LMGgfXXdMhhOmqKAll6taLNhP0S8zag/exec";
 
+document.addEventListener("DOMContentLoaded", () => {
+  const tipo = document.getElementById("tipo");
+  if(tipo) {
+    tipo.addEventListener("change", () => {
+      document.getElementById("pressaoFields").hidden = tipo.value !== "pressao";
+      document.getElementById("glicemiaFields").hidden = tipo.value !== "glicemia";
+    });
+  }
 
-// Results page
-function initResults(){
-if (!document.getElementById('resultsTable')) return;
-const filterForm = document.getElementById('filterForm');
-const resetBtn = document.getElementById('resetFiltros');
-document.getElementById('exportBtn2')?.addEventListener('click', exportJSON);
+  const form = document.getElementById("entryForm");
+  if(form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const body = {
+        id: "id-" + Date.now(),
+        nome: document.getElementById("nome").value,
+        tipo: document.getElementById("tipo").value,
+        pas: document.getElementById("pas")?.value,
+        pad: document.getElementById("pad")?.value,
+        fc: document.getElementById("fc")?.value,
+        mgdl: document.getElementById("mgdl")?.value,
+        contexto: document.getElementById("ctx")?.value,
+        obs: document.getElementById("obs").value,
+        datetime: new Date().toISOString()
+      };
+      await fetch(WEBAPP_URL, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json" }
+      });
+      alert("Registro salvo!");
+      form.reset();
+    });
+  }
 
-
-filterForm.addEventListener('submit', ev=>{ ev.preventDefault(); renderResults(); });
-resetBtn.addEventListener('click', ()=>{ filterForm.reset(); renderResults(); });
-
-
-renderResults();
-}
-
-
-function renderResults(){
-const table = document.getElementById('resultsTable');
-if (!table) return;
-const tbody = table.querySelector('tbody');
-
-
-const fNome = (document.getElementById('fNome')?.value || '').toLowerCase().trim();
-const fTipo = (document.getElementById('fTipo')?.value || '').trim();
-const fIni = document.getElementById('fIni')?.value;
-const fFim = document.getElementById('fFim')?.value;
-
-
-let data = loadAll();
-if (fNome) data = data.filter(r => r.nome.toLowerCase().includes(fNome));
-if (fTipo) data = data.filter(r => r.tipo === fTipo);
-if (fIni){ const d = new Date(fIni+'T00:00'); data = data.filter(r => new Date(r.datetime) >= d); }
-if (fFim){ const d = new Date(fFim+'T23:59'); data = data.filter(r => new Date(r.datetime) <= d); }
-
-
-const rows = data.map(r=>`
-<tr>
-<td>${fmtDate(r.datetime)}</td>
-<td>${escapeHtml(r.nome)}</td>
-<td>${r.tipo === 'pressao' ? 'Pressão' : 'Glicemia'}</td>
-<td>${escapeHtml(r.valor)}</td>
-<td>${escapeHtml(r.obs||'')}</td>
-</tr>`).join('');
-tbody.innerHTML = rows || `<tr><td colspan="5">Nada encontrado com os filtros.</td></tr>`;
-}
-
-
-function escapeHtml(str){
-return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
-}
-
-
-// Boot
-document.addEventListener('DOMContentLoaded', ()=>{
-initIndex();
-initResults();
-
-
-// Hook export/import on index already set; also attach on results
-const importEl = document.getElementById('importFile');
-if (importEl){ /* index only */ }
+  const table = document.getElementById("resultsTable");
+  if(table) {
+    fetch(WEBAPP_URL)
+      .then(r=>r.json())
+      .then(data=>{
+        const tbody = table.querySelector("tbody");
+        tbody.innerHTML = "";
+        data.forEach(r=>{
+          const tr = document.createElement("tr");
+          const val = r.tipo==="pressao" ? `${r.pas}/${r.pad} (FC ${r.fc})` : `${r.mgdl} mg/dL (${r.contexto})`;
+          tr.innerHTML = `<td>${r.datetime}</td><td>${r.nome}</td><td>${r.tipo}</td><td>${val}</td><td>${r.obs}</td>`;
+          tbody.appendChild(tr);
+        });
+        drawCharts(data);
+      });
+  }
 });
-})();
+
+function drawCharts(data) {
+  const ctxPA = document.getElementById("chartPA");
+  const ctxGlic = document.getElementById("chartGlic");
+  const dPA = data.filter(r=>r.tipo==="pressao");
+  const dG = data.filter(r=>r.tipo==="glicemia");
+
+  if(ctxPA && dPA.length) {
+    new Chart(ctxPA, {
+      type: 'line',
+      data: {
+        labels: dPA.map(r=>r.datetime),
+        datasets: [
+          { label:'PAS', data: dPA.map(r=>Number(r.pas)) },
+          { label:'PAD', data: dPA.map(r=>Number(r.pad)) },
+          { label:'FC', data: dPA.map(r=>Number(r.fc)) }
+        ]
+      }
+    });
+  }
+
+  if(ctxGlic && dG.length) {
+    new Chart(ctxGlic, {
+      type: 'line',
+      data: {
+        labels: dG.map(r=>r.datetime),
+        datasets: [
+          { label:'Glicemia (mg/dL)', data: dG.map(r=>Number(r.mgdl)) }
+        ]
+      }
+    });
+  }
+}
