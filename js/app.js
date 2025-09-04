@@ -97,9 +97,13 @@ async function loadResults() {
   console.log("Dados carregados:", data);
 
   const rows = data.map(r => {
-    const valor = r.tipo === "pressao"
-      ? `${r.pas}/${r.pad} (FC: ${r.fc})`
-      : `${r.mgdl} mg/dL (${r.contexto})`;
+    let valor;
+    if (r.tipo === "pressao") {
+      valor = `${r.pas}/${r.pad} (FC: ${r.fc})`;
+    } else {
+      valor = `${r.mgdl} mg/dL (${r.contexto})`;
+    }
+
     return `<tr>
       <td>${r.datetime}</td>
       <td>${r.nome}</td>
