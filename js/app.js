@@ -1,4 +1,4 @@
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyacpivpxwG1PRbtP-fhpTKLgD_7xfo7cARUGcFJUbp-QyMEWPOW-b_edA8NtDFiOPt4A/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzGqLmdKLutzGn9PhF1cNM94ZxnbbmeYlHu3e1Kt7Hcq278rpPaPAnO220uGOfVLRQmHg/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
   const tipo = document.getElementById("tipo");
