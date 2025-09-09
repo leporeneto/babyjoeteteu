@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro Saúde</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html">Registrar</a> | 
+    <a href="historico.html">Histórico</a>
+  </nav>
+
+  <h1>Registrar Medição</h1>
+
+  <form id="registroForm">
+    <label>Nome: <input type="text" id="nome" required></label><br><br>
+
+    <label>Data e Hora:
+      <input type="datetime-local" id="dataHora">
+      <button type="button" id="agoraBtn">Agora</button>
+    </label><br><br>
+
+    <label>Tipo:
+      <select id="tipo">
+        <option value="glicemia">Glicemia</option>
+        <option value="pressao">Pressão Arterial</option>
+      </select>
+    </label><br><br>
+
+    <div id="glicemiaFields">
+      <label>Valor (mg/dL): <input type="number" id="glicemiaValor"></label><br>
+      <label>Sintomas: <input type="text" id="glicemiaSintomas"></label>
+    </div>
+
+    <div id="pressaoFields" style="display:none;">
+      <label>PAS: <input type="number" id="pas"></label><br>
+      <label>PAD: <input type="number" id="pad"></label><br>
+      <label>FC: <input type="number" id="fc"></label><br>
+      <label>Sintomas: <input type="text" id="pressaoSintomas"></label>
+    </div><br>
+
+    <button type="submit">Registrar</button>
+    <button type="reset">Limpar</button>
+  </form>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
