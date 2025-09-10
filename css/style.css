@@ -1,3 +1,4 @@
+/* === Layout base === */
 body {
   font-family: "Segoe UI", sans-serif;
   margin: 0;
@@ -11,16 +12,27 @@ body {
   color: #3e2723;
 }
 
+/* Camada translúcida para dar efeito de papel */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(3px);
+  z-index: -1;
+}
+
 .container {
   background: rgba(255,255,255,0.85);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 25px;
   max-width: 700px;
   width: 95%;
   margin: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
 
+/* === Navegação === */
 nav {
   margin-bottom: 20px;
   font-size: 18px;
@@ -30,52 +42,100 @@ nav {
 nav a {
   margin: 0 10px;
   text-decoration: none;
-  color: #0077b6;
+  color: #7b1fa2;
   font-weight: bold;
+  transition: 0.3s;
 }
 
+nav a:hover {
+  color: #ad1457;
+}
+
+/* === Títulos === */
 h1, h2 {
-  font-family: "Georgia", serif;
-  color: #5d4037;
+  font-family: "Playfair Display", Georgia, serif;
+  color: #4e342e;
   text-align: center;
+  margin-bottom: 15px;
 }
 
+/* === Formulário === */
 form label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  color: #4e342e;
+  font-weight: 500;
 }
 
-button {
-  margin: 5px;
-  padding: 8px 14px;
-  border: none;
+input, select {
+  padding: 8px;
+  border: 1px solid #ccc;
   border-radius: 6px;
-  background-color: #0077b6;
+  width: 100%;
+  max-width: 300px;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #ab47bc;
+  box-shadow: 0 0 4px rgba(171,71,188,0.5);
+}
+
+/* === Botões === */
+button {
+  margin: 8px 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #f48fb1, #ce93d8);
   color: white;
+  font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 button:hover {
-  background-color: #023e8a;
+  background: linear-gradient(135deg, #ce93d8, #f48fb1);
+  transform: scale(1.05);
 }
 
+/* === Filtros === */
 .filtros {
   text-align: center;
   margin-bottom: 20px;
 }
 
+.filtros input {
+  margin: 0 5px;
+}
+
+/* === Tabelas === */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-top: 20px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-table th, table td {
-  border: 1px solid #999;
-  padding: 6px;
-  text-align: center;
+table th {
+  background: #f8bbd0;
+  color: #4e342e;
+  padding: 10px;
+  font-weight: bold;
 }
 
+table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+table tr:nth-child(even) {
+  background: #fce4ec;
+}
+
+/* === Responsividade === */
 @media (max-width: 600px) {
   .container {
     padding: 15px;
@@ -85,8 +145,12 @@ table th, table td {
     font-size: 16px;
   }
 
+  input, select {
+    max-width: 100%;
+  }
+
   button {
-    padding: 6px 10px;
+    padding: 8px 14px;
     font-size: 14px;
   }
 }
