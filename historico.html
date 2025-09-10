@@ -7,26 +7,36 @@
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Registrar</a> | 
-    <a href="historico.html">Histórico</a>
-  </nav>
+  <div class="container">
+    <nav>
+      <a href="index.html">Registrar</a> | 
+      <a href="historico.html">Histórico</a>
+    </nav>
 
-  <h1>Histórico de Registros</h1>
+    <h1>Histórico de Registros</h1>
 
-  <h2>Glicemia</h2>
-  <table border="1" id="tabelaGlicemia">
-    <tr>
-      <th>Nome</th><th>Data/Hora</th><th>Valor</th><th>Sintomas</th>
-    </tr>
-  </table>
+    <div class="filtros">
+      <label>Nome: <input type="text" id="filtroNome"></label>
+      <label>De: <input type="date" id="filtroInicio"></label>
+      <label>Até: <input type="date" id="filtroFim"></label>
+      <button onclick="aplicarFiltros()">Filtrar</button>
+      <button onclick="resetarFiltros()">Limpar</button>
+      <button onclick="window.print()">🖨️ Imprimir</button>
+    </div>
 
-  <h2>Pressão Arterial</h2>
-  <table border="1" id="tabelaPressao">
-    <tr>
-      <th>Nome</th><th>Data/Hora</th><th>PAS</th><th>PAD</th><th>FC</th><th>Sintomas</th>
-    </tr>
-  </table>
+    <h2>Glicemia</h2>
+    <table border="1" id="tabelaGlicemia">
+      <tr>
+        <th>Nome</th><th>Data/Hora</th><th>Valor</th><th>Sintomas</th>
+      </tr>
+    </table>
 
+    <h2>Pressão Arterial</h2>
+    <table border="1" id="tabelaPressao">
+      <tr>
+        <th>Nome</th><th>Data/Hora</th><th>PAS</th><th>PAD</th><th>FC</th><th>Sintomas</th>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>

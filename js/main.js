@@ -12,9 +12,10 @@ const firebaseConfig = {
   appId: "1:678197642263:web:9db5a939a76c4d4c050852"
 };
 
-// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+let todosRegistros = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   const tipoSelect = document.getElementById("tipo");
@@ -32,7 +33,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (agoraBtn) {
     agoraBtn.addEventListener("click", () => {
-      document.getElementById("dataHora").value = new Date().toISOString().slice(0,16);
+      const agora = new Date();
+      const local = agora.toLocaleString("sv-SE", { hour12: false }).replace(" ", "T");
+      document.getElementById("dataHora").value = local.slice(0,16);
     });
   }
 
@@ -42,6 +45,33 @@ document.addEventListener("DOMContentLoaded", () => {
       await salvarRegistro();
       alert("Registro salvo no Firebase!");
       form.reset();
+    });
+  }
+
+  const semSintomasG = document.getElementById("semSintomasGlicemia");
+  if (semSintomasG) {
+    semSintomasG.addEventListener("change", e => {
+      const field = document.getElementById("glicemiaSintomas");
+      if (e.target.checked) {
+        field.value = "Sem sintomas";
+        field.disabled = true;
+      } else {
+        field.value = "";
+        field.disabled = false;
+      }
+    });
+  }
+  const semSintomasP = document.getElementById("semSintomasPressao");
+  if (semSintomasP) {
+    semSintomasP.addEventListener("change", e => {
+      const field = document.getElementById("pressaoSintomas");
+      if (e.target.checked) {
+        field.value = "Sem sintomas";
+        field.disabled = true;
+      } else {
+        field.value = "";
+        field.disabled = false;
+      }
     });
   }
 
@@ -80,39 +110,57 @@ async function salvarRegistro() {
 }
 
 async function carregarHistorico() {
-  const tabelaGlicemia = document.getElementById("tabelaGlicemia");
-  const tabelaPressao = document.getElementById("tabelaPressao");
-
-  if (!tabelaGlicemia && !tabelaPressao) return;
-
   const registrosRef = ref(db, 'registros');
   onValue(registrosRef, (snapshot) => {
     const data = snapshot.val();
     if (!data) return;
+    todosRegistros = Object.values(data);
+    renderTabela(todosRegistros);
+  });
+}
 
-    if (tabelaGlicemia) {
-      tabelaGlicemia.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>Valor</th><th>Sintomas</th></tr>";
-    }
-    if (tabelaPressao) {
-      tabelaPressao.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>PAS</th><th>PAD</th><th>FC</th><th>Sintomas</th></tr>";
-    }
+function aplicarFiltros() {
+  const nome = document.getElementById("filtroNome").value.toLowerCase();
+  const inicio = document.getElementById("filtroInicio").value;
+  const fim = document.getElementById("filtroFim").value;
 
-    Object.values(data).forEach(r => {
-      if (r.tipo === "glicemia" && tabelaGlicemia) {
-        let row = tabelaGlicemia.insertRow();
-        row.insertCell(0).innerText = r.nome;
-        row.insertCell(1).innerText = r.dataHora;
-        row.insertCell(2).innerText = r.valor;
-        row.insertCell(3).innerText = r.sintomas;
-      } else if (r.tipo === "pressao" && tabelaPressao) {
-        let row = tabelaPressao.insertRow();
-        row.insertCell(0).innerText = r.nome;
-        row.insertCell(1).innerText = r.dataHora;
-        row.insertCell(2).innerText = r.pas;
-        row.insertCell(3).innerText = r.pad;
-        row.insertCell(4).innerText = r.fc;
-        row.insertCell(5).innerText = r.sintomas;
-      }
-    });
+  const filtrados = todosRegistros.filter(r => {
+    const nomeOk = !nome || (r.nome && r.nome.toLowerCase().includes(nome));
+    const dataOk = (!inicio || r.dataHora >= inicio) && (!fim || r.dataHora <= fim+"T23:59");
+    return nomeOk && dataOk;
+  });
+
+  renderTabela(filtrados);
+}
+
+function resetarFiltros() {
+  document.getElementById("filtroNome").value = "";
+  document.getElementById("filtroInicio").value = "";
+  document.getElementById("filtroFim").value = "";
+  renderTabela(todosRegistros);
+}
+
+function renderTabela(lista) {
+  const tabelaGlicemia = document.getElementById("tabelaGlicemia");
+  const tabelaPressao = document.getElementById("tabelaPressao");
+  if (tabelaGlicemia) tabelaGlicemia.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>Valor</th><th>Sintomas</th></tr>";
+  if (tabelaPressao) tabelaPressao.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>PAS</th><th>PAD</th><th>FC</th><th>Sintomas</th></tr>";
+
+  lista.forEach(r => {
+    if (r.tipo === "glicemia" && tabelaGlicemia) {
+      let row = tabelaGlicemia.insertRow();
+      row.insertCell(0).innerText = r.nome;
+      row.insertCell(1).innerText = r.dataHora;
+      row.insertCell(2).innerText = r.valor;
+      row.insertCell(3).innerText = r.sintomas;
+    } else if (r.tipo === "pressao" && tabelaPressao) {
+      let row = tabelaPressao.insertRow();
+      row.insertCell(0).innerText = r.nome;
+      row.insertCell(1).innerText = r.dataHora;
+      row.insertCell(2).innerText = r.pas;
+      row.insertCell(3).innerText = r.pad;
+      row.insertCell(4).innerText = r.fc;
+      row.insertCell(5).innerText = r.sintomas;
+    }
   });
 }
