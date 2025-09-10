@@ -1,5 +1,20 @@
-// COLE AQUI SUA URL DO WEBAPP (Google Apps Script publicado como Web App)
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxVotG0Eetd49db31mASRMB56ATB7Q67Zk2garkE1AYAcW4U3KtI_wuAHRW_KHAv8KQ/exec";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+// Configuração Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDVYfkxe7-7IZ_57hbv5mnczwmv-YG3rfQ",
+  authDomain: "babyjoeteteu.firebaseapp.com",
+  databaseURL: "https://babyjoeteteu-default-rtdb.firebaseio.com",
+  projectId: "babyjoeteteu",
+  storageBucket: "babyjoeteteu.firebasestorage.app",
+  messagingSenderId: "678197642263",
+  appId: "1:678197642263:web:9db5a939a76c4d4c050852"
+};
+
+// Inicializa Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 document.addEventListener("DOMContentLoaded", () => {
   const tipoSelect = document.getElementById("tipo");
@@ -25,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       await salvarRegistro();
-      alert("Registro enviado!");
+      alert("Registro salvo no Firebase!");
       form.reset();
     });
   }
@@ -38,10 +53,10 @@ async function salvarRegistro() {
   const dataHora = document.getElementById("dataHora").value;
   const tipo = document.getElementById("tipo").value;
 
-  let payload;
+  let registro;
 
   if (tipo === "glicemia") {
-    payload = {
+    registro = {
       tipo,
       nome,
       dataHora,
@@ -49,7 +64,7 @@ async function salvarRegistro() {
       sintomas: document.getElementById("glicemiaSintomas").value
     };
   } else {
-    payload = {
+    registro = {
       tipo,
       nome,
       dataHora,
@@ -60,40 +75,44 @@ async function salvarRegistro() {
     };
   }
 
-  await fetch(WEBAPP_URL, {
-    method: "POST",
-    body: JSON.stringify(payload),
-    headers: {"Content-Type": "application/json"}
-  });
+  const registrosRef = ref(db, 'registros');
+  await push(registrosRef, registro);
 }
 
 async function carregarHistorico() {
   const tabelaGlicemia = document.getElementById("tabelaGlicemia");
   const tabelaPressao = document.getElementById("tabelaPressao");
+
   if (!tabelaGlicemia && !tabelaPressao) return;
 
-  const resp = await fetch(WEBAPP_URL);
-  const dados = await resp.json();
+  const registrosRef = ref(db, 'registros');
+  onValue(registrosRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
 
-  if (tabelaGlicemia) {
-    dados.glicemia.forEach(r => {
-      let row = tabelaGlicemia.insertRow();
-      row.insertCell(0).innerText = r.nome;
-      row.insertCell(1).innerText = r.dataHora;
-      row.insertCell(2).innerText = r.valor;
-      row.insertCell(3).innerText = r.sintomas;
-    });
-  }
+    if (tabelaGlicemia) {
+      tabelaGlicemia.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>Valor</th><th>Sintomas</th></tr>";
+    }
+    if (tabelaPressao) {
+      tabelaPressao.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>PAS</th><th>PAD</th><th>FC</th><th>Sintomas</th></tr>";
+    }
 
-  if (tabelaPressao) {
-    dados.pressao.forEach(r => {
-      let row = tabelaPressao.insertRow();
-      row.insertCell(0).innerText = r.nome;
-      row.insertCell(1).innerText = r.dataHora;
-      row.insertCell(2).innerText = r.pas;
-      row.insertCell(3).innerText = r.pad;
-      row.insertCell(4).innerText = r.fc;
-      row.insertCell(5).innerText = r.sintomas;
+    Object.values(data).forEach(r => {
+      if (r.tipo === "glicemia" && tabelaGlicemia) {
+        let row = tabelaGlicemia.insertRow();
+        row.insertCell(0).innerText = r.nome;
+        row.insertCell(1).innerText = r.dataHora;
+        row.insertCell(2).innerText = r.valor;
+        row.insertCell(3).innerText = r.sintomas;
+      } else if (r.tipo === "pressao" && tabelaPressao) {
+        let row = tabelaPressao.insertRow();
+        row.insertCell(0).innerText = r.nome;
+        row.insertCell(1).innerText = r.dataHora;
+        row.insertCell(2).innerText = r.pas;
+        row.insertCell(3).innerText = r.pad;
+        row.insertCell(4).innerText = r.fc;
+        row.insertCell(5).innerText = r.sintomas;
+      }
     });
-  }
+  });
 }
