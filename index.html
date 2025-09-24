@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Registros Gestação - Joana e Teteu</title>
+  <title>Registro Saúde</title>
   <link rel="stylesheet" href="css/style.css">
   <script type="module" src="js/main.js"></script>
 </head>
@@ -32,6 +32,19 @@
 
       <div id="glicemiaFields">
         <label>Valor (mg/dL): <input type="number" id="glicemiaValor"></label><br>
+        <label>Momento:
+          <select id="glicemiaMomento">
+            <option value="">Selecione...</option>
+            <option>Jejum</option>
+            <option>Aleatória</option>
+            <option>antes do café-da-manhã</option>
+            <option>2h após café-da-manhã</option>
+            <option>antes do almoço</option>
+            <option>2h após almoço</option>
+            <option>antes do jantar</option>
+            <option>2h após jantar</option>
+          </select>
+        </label><br>
         <label>
           Sintomas:
           <input type="text" id="glicemiaSintomas" placeholder="Descreva sintomas">

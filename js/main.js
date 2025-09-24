@@ -91,6 +91,7 @@ async function salvarRegistro() {
       nome,
       dataHora,
       valor: document.getElementById("glicemiaValor").value,
+      momento: document.getElementById("glicemiaMomento").value,
       sintomas: document.getElementById("glicemiaSintomas").value
     };
   } else {
@@ -143,7 +144,7 @@ function resetarFiltros() {
 function renderTabela(lista) {
   const tabelaGlicemia = document.getElementById("tabelaGlicemia");
   const tabelaPressao = document.getElementById("tabelaPressao");
-  if (tabelaGlicemia) tabelaGlicemia.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>Valor</th><th>Sintomas</th></tr>";
+  if (tabelaGlicemia) tabelaGlicemia.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>Valor</th><th>Momento</th><th>Sintomas</th></tr>";
   if (tabelaPressao) tabelaPressao.innerHTML = "<tr><th>Nome</th><th>Data/Hora</th><th>PAS</th><th>PAD</th><th>FC</th><th>Sintomas</th></tr>";
 
   lista.forEach(r => {
@@ -152,7 +153,8 @@ function renderTabela(lista) {
       row.insertCell(0).innerText = r.nome;
       row.insertCell(1).innerText = r.dataHora;
       row.insertCell(2).innerText = r.valor;
-      row.insertCell(3).innerText = r.sintomas;
+      row.insertCell(3).innerText = r.momento || "";
+      row.insertCell(4).innerText = r.sintomas;
     } else if (r.tipo === "pressao" && tabelaPressao) {
       let row = tabelaPressao.insertRow();
       row.insertCell(0).innerText = r.nome;
